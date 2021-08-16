@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<ArrayOfPlayer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Player>
+    <nome>Douglas</nome>
+    <hpAgora>100</hpAgora>
+    <HpCheio>100</HpCheio>
+  </Player>
+  <Player>
+    <nome>Denis</nome>
+    <hpAgora>50</hpAgora>
+    <HpCheio>100</HpCheio>
+  </Player>
+  <Player>
+    <nome>rika</nome>
+    <hpAgora>1</hpAgora>
+    <HpCheio>100</HpCheio>
+  </Player>
+  <Player>
+    <nome>Lucario</nome>
+    <hpAgora>40</hpAgora>
+    <HpCheio>46</HpCheio>
+  </Player>
+</ArrayOfPlayer>

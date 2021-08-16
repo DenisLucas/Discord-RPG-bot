@@ -6,6 +6,7 @@ using System.IO;
 using System.Xml.Serialization;
 using DiscordBotTest.Models;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DiscordBotTest.Commands
 {
@@ -15,8 +16,8 @@ namespace DiscordBotTest.Commands
         public string pathTurnos = @"Memory/turnos.txt";
 
         public string pathPlayers = @"Memory/players.xml";
-        [Command("Dado")]
-        public async Task dado(string request)
+        [Command("d")]
+        public async Task diceAsync(string request)
         {
             var dado = request.Split("d");
             
@@ -30,8 +31,8 @@ namespace DiscordBotTest.Commands
             
         }
 
-        [Command("ordem")]
-        public async Task addRodada(string request)
+        [Command("o")]
+        public async Task addRoundAsync(string request)
         {
             
             
@@ -47,8 +48,8 @@ namespace DiscordBotTest.Commands
             await Context.Channel.SendMessageAsync($"Turno de {turno.ordem[0]}");     
         }
 
-        [Command("next")]
-        public async Task next()
+        [Command("N")]
+        public async Task nextAsync()
         {
             FileStream file = File.OpenRead(pathTurnos);
             var turno = await JsonSerializer.DeserializeAsync<Turnos>(file);
@@ -60,8 +61,8 @@ namespace DiscordBotTest.Commands
             await File.WriteAllTextAsync(pathTurnos, json);     
         }
 
-        [Command("last")]
-        public async Task last()
+        [Command("l")]
+        public async Task lastAsync()
         {
             FileStream file = File.OpenRead(pathTurnos);
             var turno = await JsonSerializer.DeserializeAsync<Turnos>(file);
@@ -70,15 +71,15 @@ namespace DiscordBotTest.Commands
             await Context.Channel.SendMessageAsync($" o ultimo a jogar foi {turno.ordem[turno.pos]}");
         }
 
-        [Command("now")]
-        public async Task now()
+        [Command("nw")]
+        public async Task nowAsync()
         {
             FileStream file = File.OpenRead(pathTurnos);
             var turno = await JsonSerializer.DeserializeAsync<Turnos>(file);
             await Context.Channel.SendMessageAsync($" Turno de {turno.ordem[turno.pos]}");
         }
-        [Command("SaveChar")]
-        public  async Task savechar(string request)
+        [Command("s")]
+        public  async Task savecharAsync(string request)
         {
             
             var commando = request.Split(',');
@@ -95,16 +96,34 @@ namespace DiscordBotTest.Commands
             XmlSerializer serial = new XmlSerializer(typeof(List<Player>));
             
             List<Player> jsonList = new List<Player>();
-            Stream stream = File.OpenWrite(pathPlayers);
-            jsonList = (List<Player>)serial.Deserialize(stream);
+            if (File.Exists(pathPlayers))
+            {
+                Stream stream = File.Open(pathPlayers, FileMode.Open);
+                jsonList = (List<Player>)serial.Deserialize(stream);
+                stream.Close();
+            }
+            Stream str = File.OpenWrite(pathPlayers);
+            
             jsonList.Add(Player);
-            serial.Serialize(stream,jsonList);
+            serial.Serialize(str,jsonList);
 
-            stream.Close();
-            
-
-            
+            str.Close();
             await Context.Channel.SendMessageAsync($"player {Player.nome} adicionado!");       
+        }
+    
+        [Command("ch")]
+        public async Task GetPlayerAsync(string request)
+        {
+            XmlSerializer serial = new XmlSerializer(typeof(List<Player>));
+            List<Player> jsonList = new List<Player>();
+
+            Stream stream = File.Open(pathPlayers, FileMode.Open);
+            jsonList = (List<Player>)serial.Deserialize(stream);
+            stream.Close();
+            Player player = jsonList.Where(x=> x.nome.ToLower() == request.ToLower()).FirstOrDefault();
+            if (player != null) await Context.Channel.SendMessageAsync($"player {player.nome} tem hp {player.hpAgora}/{player.HpCheio}!");
+            else await Context.Channel.SendMessageAsync($"player não existe");
+            
         }
     }
 
