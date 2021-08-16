@@ -3,8 +3,9 @@ using System.Threading.Tasks;
 using Discord.Commands;
 using System.Text.Json;
 using System.IO;
-using System.Text;
+using System.Xml.Serialization;
 using DiscordBotTest.Models;
+using System.Collections.Generic;
 
 namespace DiscordBotTest.Commands
 {
@@ -12,6 +13,8 @@ namespace DiscordBotTest.Commands
     {
 
         public string pathTurnos = @"Memory/turnos.txt";
+
+        public string pathPlayers = @"Memory/players.xml";
         [Command("Dado")]
         public async Task dado(string request)
         {
@@ -74,7 +77,35 @@ namespace DiscordBotTest.Commands
             var turno = await JsonSerializer.DeserializeAsync<Turnos>(file);
             await Context.Channel.SendMessageAsync($" Turno de {turno.ordem[turno.pos]}");
         }
-     
+        [Command("SaveChar")]
+        public  async Task savechar(string request)
+        {
+            
+            var commando = request.Split(',');
+            
+            var Player = new Player
+            {
+                nome = commando[0],
+                hpAgora = Convert.ToInt32(commando[1]),
+                HpCheio = Convert.ToInt32(commando[2])
+            };
+            
+            
+
+            XmlSerializer serial = new XmlSerializer(typeof(List<Player>));
+            
+            List<Player> jsonList = new List<Player>();
+            Stream stream = File.OpenWrite(pathPlayers);
+            jsonList = (List<Player>)serial.Deserialize(stream);
+            jsonList.Add(Player);
+            serial.Serialize(stream,jsonList);
+
+            stream.Close();
+            
+
+            
+            await Context.Channel.SendMessageAsync($"player {Player.nome} adicionado!");       
+        }
     }
 
 }
